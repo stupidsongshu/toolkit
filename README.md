@@ -1179,7 +1179,7 @@ delayFn: function (fn, delay, mustDelay) {
     };
 }
 ```
-
+> https://segmentfault.com/a/1190000011557368
 ## 浮点数取整
 ``` js
 const x = 123.45;
