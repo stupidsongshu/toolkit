@@ -206,6 +206,17 @@ randomWord: function (count) {
     return Math.random().toString(count).substring(2);
 }
 ```
+### 生成6位数字验证码
+``` js
+// 方法一
+('000000' + Math.floor(Math.random() * 999999)).slice(-6);
+// 方法二
+Math.random().toString().slice(-6);
+// 方法三
+Math.random().toFixed(6).slice(-6);
+// 方法四
+'' + Math.floor(Math.random() * 999999);
+```
 
 ## 1.9 查找字符串
 ``` js
@@ -593,6 +604,7 @@ arraySort: function (arr, sortText) {
 ```
 
 ## 2.13 数组扁平化
+### 方法一
 ``` js
 //steamroller([1,2,[4,5,[1,23]]])
 //[1, 2, 4, 5, 1, 23]
@@ -611,6 +623,25 @@ steamroller: function (arr) {
     return newArr;
 }
 ```
+### 方法二
+``` js
+// flatten([1, [2, 3], ['4', 5, ['6',7,[8]]], [9], 10])
+// result: [1, 2, 3, "4", 5, "6", 7, 8, 9, 10]
+flatten: function(arr) {
+    return JSON.parse(`[${JSON.stringify(foo).replace(/\[|]/g, '')}]`);
+}
+```
+### 方法三
+``` js
+const flatten = (arr) => arr.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
+```
+### 方法四
+``` js
+function flatten(arr) {
+    return Array.isArray(arr) ? [].concat(...arr.map(flatten)) : arr;
+}
+```
+> 注：更多方法请参考《How to flatten nested array in JavaScript?》
 
 - - -
 ## cookie
@@ -690,41 +721,6 @@ upDigit: function (n) {
 } 
 ```
 
-## 设置、获取url参数
-``` js
-//设置url参数
-//setUrlPrmt({'a':1,'b':2})
-//result：a=1&b=2
-setUrlPrmt: function (obj) {
-    var _rs = [];
-    for (var p in obj) {
-        if (obj[p] != null && obj[p] != '') {
-            _rs.push(p + '=' + obj[p])
-        }
-    }
-    return _rs.join('&');
-},
-//获取url参数
-//getUrlPrmt('test.com/write?draftId=122000011938')
-//result：Object{draftId: "122000011938"}
-getUrlPrmt: function (url) {
-    url = url ? url : window.location.href;
-    var _pa = url.substring(url.indexOf('?') + 1),
-        _arrS = _pa.split('&'),
-        _rs = {};
-    for (var i = 0, _len = _arrS.length; i < _len; i++) {
-        var pos = _arrS[i].indexOf('=');
-        if (pos == -1) {
-            continue;
-        }
-        var name = _arrS[i].substring(0, pos),
-            value = window.decodeURIComponent(_arrS[i].substring(pos + 1));
-        _rs[name] = value;
-    }
-    return _rs;
-}
-```
-
 ## 随机返回一个范围的数字
 ``` js
 //randomNumber(5,10)
@@ -763,6 +759,11 @@ randomColor: function () {
 //Math.floor(Math.random()*0xffffff).toString(16);
 ```
 
+## 随机生成16进制颜色代码
+``` js
+'#' + ('00000' +(Math.random() * 0x1000000 << 0).toString(16)).slice(-6)
+```
+
 ## 到某一个时间的倒计时
 ``` js
 //getEndTime('2017/7/22 16:0:0')
@@ -783,6 +784,130 @@ getEndTime: function (endTime) {
     }
     return "剩余时间" + d + "天 " + h + "小时 " + m + " 分钟" + s + " 秒";
 }
+```
+
+## 日期格式化
+``` js
+// format(new Date(), 'yyyy-MM-dd hh:mm:ss')
+// result: 2018-02-24 17:45:24
+function format(x, y) {
+    var z = {
+        y: x.getFullYear(),
+        M: x.getMonth() + 1,
+        d: x.getDate(),
+        h: x.getHours(),
+        m: x.getMinutes(),
+        s: x.getSeconds()
+    };
+
+    return y.replace(/(y+|M+|d+|h+|m+|s+)/g, function(v) {
+        return ((v.length > 1 ? "0" : "") + eval('z.' + v.slice(-1))).slice(-(v.length > 2 ? v.length : 2));
+    });
+}
+```
+
+``` js
+// new Date().format('yyyy-MM-d h:m:ss:S')
+// result: 2018-02-24 17:58:20:767
+Date.prototype.format = function(fmt) {
+    var o = {
+        "M+": this.getMonth() + 1, //月份
+        "d+": this.getDate(), //日
+        "h+": this.getHours(), //小时
+        "m+": this.getMinutes(), //分
+        "s+": this.getSeconds(), //秒
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+        "S": this.getMilliseconds() //毫秒
+    };
+
+    if (/(y+)/.test(fmt)){
+        fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    }
+
+    for (var k in o) {
+        if (new RegExp("(" + k + ")").test(fmt)){
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        }
+    }
+
+    return fmt;
+}
+```
+
+## 设置url参数
+``` js
+//设置url参数
+//setUrlPrmt({'a':1,'b':2})
+//result：a=1&b=2
+setUrlPrmt: function (obj) {
+    var _rs = [];
+    for (var p in obj) {
+        if (obj[p] != null && obj[p] != '') {
+            _rs.push(p + '=' + obj[p])
+        }
+    }
+    return _rs.join('&');
+}
+```
+## 获取url参数中某个key的value
+``` js
+// http://test.com?oldMobileNo=15067057672&newMobileNo=15267996659&idNo=513029198807100037
+// getQueryString('newMobileNo')
+// result: 15267996659
+getQueryString: function (key) {
+    var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+        return unescape(r[2]);
+    }
+    return null;
+}
+```
+## url查询参数转json格式
+### 方法一
+``` js
+//getUrlPrmt('test.com/write?draftId=122000011938')
+//result：Object{draftId: "122000011938"}
+getUrlPrmt: function (url) {
+    url = url ? url : window.location.href;
+    var _pa = url.substring(url.indexOf('?') + 1),
+        _arrS = _pa.split('&'),
+        _rs = {};
+    for (var i = 0, _len = _arrS.length; i < _len; i++) {
+        var pos = _arrS[i].indexOf('=');
+        if (pos == -1) {
+            continue;
+        }
+        var name = _arrS[i].substring(0, pos),
+            value = window.decodeURIComponent(_arrS[i].substring(pos + 1));
+        _rs[name] = value;
+    }
+    return _rs;
+}
+```
+### 方法二(ES5)
+``` js
+//query('test.com/write?draftId=122000011938')
+//result：Object{draftId: "122000011938"}
+query：function (search) {
+    if (search === void 0) search = '';
+    return (function(querystring) {
+        if (querystring === void 0) querystring = '';
+        return (function(q) {
+            return (querystring.split('&').forEach(function(item) {
+                return (function(kv) {
+                    return kv[0] && (q[kv[0]] = kv[1]);
+                })(item.split('='));
+            }), q);
+        })({});
+    })(search.split('?')[1]);
+}
+```
+### 方法三(ES6)
+``` js
+//query('test.com/write?draftId=122000011938')
+//result：Object{draftId: "122000011938"}
+const query = (search = '') => ((querystring = '') => (q => (querystring.split('&').forEach(item => (kv => kv[0] && (q[kv[0]] = kv[1]))(item.split('='))), q))({}))(search.split('?')[1]);
 ```
 
 ## ajax
@@ -807,7 +932,7 @@ getEndTime: function (endTime) {
 //  })
 ajax: function (obj) {
     obj = obj || {};
-    obj.type = obj.type.toUpperCase() || 'POST';
+    obj.type = obj.type ? obj.type.toUpperCase() : 'POST';
     obj.url = obj.url || '';
     obj.async = obj.async || true;
     obj.data = obj.data || null;
@@ -833,10 +958,18 @@ ajax: function (obj) {
         xmlHttp.send(null);
     }
     xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            obj.success(xmlHttp.responseText);
-        } else {
-            obj.error(xmlHttp.responseText);
+        // if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+        //     obj.success(xmlHttp.responseText);
+        // } else {
+        //     obj.error(xmlHttp.responseText);
+        // }
+
+        if (xmlHttp.readyState === 4) {
+            if ((xmlHttp.status >= 200 && xmlHttp.status < 300) || xmlHttp.status === 304) {
+                obj.success(xmlHttp.responseText);
+            } else {
+                obj.error(xmlHttp.responseText);
+            }
         }
     };
 }
@@ -1044,5 +1177,72 @@ delayFn: function (fn, delay, mustDelay) {
             }, delay);
         }
     };
+}
+```
+
+## 浮点数取整
+``` js
+const x = 123.45;
+x >> 0; // 123
+~~x; // 123
+x | 0; // 123
+Math.floor(x); // 123
+
+// 注意：前三种方法只适用于32个位整数，对于负数的处理上和 Math.floor是不同的
+const y = -123.45;
+y >> 0; // -123
+~~y; // -123
+y | 0; // -123
+Math.floor(y); // -124
+Math.ceil(y); // -123
+```
+
+## 驼峰命名转下划线
+``` js
+'componentMapModelRegistry'.match(/^[a-z][a-z0-9]+|[A-Z][a-z0-9]*/g).join('_').toLowerCase()
+```
+
+## 统计文字个数
+``` js
+function wordCount(data) {
+    var pattern = /[a-zA-Z0-9_\u0392-\u03c9]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af]+/g;
+    var m = data.match(pattern);
+    var count = 0;
+    if ( m === null) return count;
+    for (var i = 0; i < m.length; i++) {
+        if (m[i].charCodeAt(0) >= 0x4E00) {
+            count += m[i].length;
+        } else {
+            count += 1;
+        }
+    }
+    return count;
+}
+```
+
+## 特殊字符转义
+``` js
+// htmlspecialchars('&jfkds<>')
+// result: &amp;jfkds&lt;&gt;
+function htmlspecialchars (str) {
+    var str = str.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, '&quot;');
+    return str;
+}
+```
+
+## 动态插入js
+``` js
+function injectScript(src) {
+    var s, t;
+    s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.async = true;
+    s.src = src;
+    t = document.getElementsByTagName('script')[0];
+
+    // 最前面
+    t.parentNode.insertBefore(s, t);
+    // 最后面
+    // t.parentNode.appendChild(s);
 }
 ```
