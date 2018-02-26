@@ -34,11 +34,28 @@ round(123.45353, 2); // 123.45
 ```
 
 ## 测试质数
+### 方法1
 ``` js
 function isPrime(n) {
   return !(/^.?$|^(..+?)\1+$/).test('1'.repeat(n))
 }
 ```
+## 方法二
+``` js
+function isPrime(n){
+  if (n <= 3) {
+    return true;
+  } else {
+    for (var i = 2; i < Math.sqrt(n); i++) {
+      if (n % i == 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+```
+
 ## 求正整数n以内的质数
 ``` js
 function getPrimeRange(n) {

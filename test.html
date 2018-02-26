@@ -8,9 +8,19 @@
     <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
 </head>
 <body>
+    <a href="javascript:void(0);">
+        这个链接点击之后不会做任何事情，如果去掉 void()， 点击之后整个页面会被替换成一个字符 0。
+    </a>
+    <p> chrome中即使
+        <a href="javascript:0;">也没变化，firefox中会变成一个字符串0 </p>
+    <a href="javascript:void(document.body.style.backgroundColor='green');">
+        点击这个链接会让页面背景变成绿色。
+    </a>
+
     <div id="someid">
         hello world!
     </div>
+
     <script>
         $.fn.flash = function(color, duration) {
             var current = this.css('color');
@@ -26,20 +36,168 @@
             });
         });
 
-        console.log('%c我%c爱%c你', 'font-size: 60px;color: red', 'font-size: 40px; color: blue', 'font-size: 20px; color: green');
+        console.log('%c我%c爱%c你', 'font-size: 60px;color: red;', 'font-size: 40px; color: green;', 'font-size: 20px; color: blue;');
 
-        var n = 100,
-            arr = []
-            function isPrime(n) {
-                return !(/^.?$|^(..+?)\1+$/).test('1'.repeat(n))
+        // url参数转json格式
+        function getUrlPrmt(url) {
+            url = url ? url : window.location.href;
+            var _pa = url.substring(url.indexOf('?') + 1),
+                _arrS = _pa.split('&'),
+                _rs = {};
+            for (var i = 0, _len = _arrS.length; i < _len; i++) {
+                var pos = _arrS[i].indexOf('=');
+                if (pos == -1) {
+                    continue;
+                }
+                var name = _arrS[i].substring(0, pos),
+                    value = window.decodeURIComponent(_arrS[i].substring(pos + 1));
+                _rs[name] = value;
             }
-        while (n > 0) {
-            var bool = isPrime(n)
-            if (bool) arr.push(n)
-            n --
+            return _rs;
         }
-        arr = arr.reverse()
-        console.log(arr)
+        var a = getUrlPrmt()
+        console.log(a);
+
+        function getQueryString(key) {
+            var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) {
+                return unescape(r[2]);
+            }
+            return null;
+        }
+        var b = getQueryString('oldMobileNo')
+        console.log(b);
+        
+        var url = window.location.href;
+        // ES6
+        const query = (search = '') => ((querystring = '') => (q => (querystring.split('&').forEach(item => (kv => kv[0] && (q[kv[0]] = kv[1]))(item.split('='))), q))({}))(search.split('?')[1]);
+        console.log(query(url));
+        // ES5
+        var query1 = function(search) {
+            if (search === void 0) search = '';
+            return (function(querystring) {
+                if (querystring === void 0) querystring = '';
+                return (function(q) {
+                    return (querystring.split('&').forEach(function(item) {
+                        return (function(kv) {
+                            return kv[0] && (q[kv[0]] = kv[1]);
+                        })(item.split('='));
+                    }), q);
+                })({});
+            })(search.split('?')[1]);
+        }
+        console.log(query1(url));
+
+        console.log('componentMapModelRegistry'.match(/^[a-z][a-z0-9]+|[A-Z][a-z0-9]*/g).join('_').toLowerCase());
+
+        var foo = [1, [2, 3], ['4', 5, ['6',7,[8]]], [9], 10];
+        console.log(JSON.parse(`[${JSON.stringify(foo).replace(/\[|]/g, '')}]`));
+
+        const flatten = (arr) => arr.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
+        console.log(flatten(foo));
+
+        function flatten1(a) {
+            return Array.isArray(a) ? [].concat(...a.map(flatten1)) : a;
+        }
+        console.log(flatten1(foo));
+
+        // 日期
+        function format1(x, y) {
+            var z = {
+                y: x.getFullYear(),
+                M: x.getMonth() + 1,
+                d: x.getDate(),
+                h: x.getHours(),
+                m: x.getMinutes(),
+                s: x.getSeconds()
+            };
+  
+            return y.replace(/(y+|M+|d+|h+|m+|s+)/g, function(v) {
+                return ((v.length > 1 ? "0" : "") + eval('z.' + v.slice(-1))).slice(-(v.length > 2 ? v.length : 2));
+            });
+        }
+        console.log(format1(new Date(), 'yyyy-MM-dd hh:mm:ss'));
+
+        Date.prototype.format2 = function(fmt) {
+            var o = {
+                "M+": this.getMonth() + 1, //月份
+                "d+": this.getDate(), //日
+                "h+": this.getHours(), //小时
+                "m+": this.getMinutes(), //分
+                "s+": this.getSeconds(), //秒
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+                "S": this.getMilliseconds() //毫秒
+            };
+
+            if (/(y+)/.test(fmt)){
+                fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            }
+
+            for (var k in o) {
+                if (new RegExp("(" + k + ")").test(fmt)){
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                }
+            }
+
+            return fmt;
+        }
+        console.log(new Date().format2('yyyy-MM-d h:m:ss:S'));
+
+        // 统计文字个数
+        function wordCount(data) {
+            var pattern = /[a-zA-Z0-9_\u0392-\u03c9]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af]+/g;
+            var m = data.match(pattern);
+            var count = 0;
+            if ( m === null) return count;
+            for (var i = 0; i < m.length; i++) {
+                if (m[i].charCodeAt(0) >= 0x4E00) {
+                    count += m[i].length;
+                } else {
+                    count += 1;
+                }
+            }
+            return count;
+        }
+        console.log('统计文字个数：' + wordCount('看空间借款借款还款计划计划计划1q121212112哈哈'));
+        console.log('\u0392', '\u03c9', '\u4E00', '\u9FA5', '\ud7af');
+
+        // 动态插入js
+        function injectScript(src) {
+            var s, t;
+            s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.async = true;
+            s.src = src;
+            t = document.getElementsByTagName('script')[0];
+            // t.parentNode.insertBefore(s, t);
+            t.parentNode.appendChild(s);
+        }
+        injectScript('https://cdn.bootcss.com/vue/2.5.13/vue.js');
+
+        // 特殊字符转义
+        function htmlspecialchars (str) {
+            var str = str.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, '&quot;');
+            return str;
+        }
+        console.log(htmlspecialchars('&jfkds<>'));
+
+        // 验证质数
+        function isPrime(n) {
+            return !(/^.?$|^(..+?)\1+$/).test('1'.repeat(n))
+        }
+
+        function getPrimeRange(n) {
+            var arr = []
+            while (n > 0) {
+                var bool = isPrime(n)
+                if (bool) arr.push(n)
+                n --
+            }
+            return arr.reverse()
+        }
+        console.log('100以内质数：');
+        console.log(getPrimeRange(100));
 
         // 身份证验证
         function checkCHNCardId(sNo) {
@@ -124,8 +282,9 @@
             }
             return true;
         }
-
-        console.log(checkCHNCardId('420624198809228615'))
+        var CHNCardId = '420624198809228615'
+        console.log(CHNCardId + ' 身份证合法性: ' + checkCHNCardId(CHNCardId));
     </script>
 </body>
+
 </html>
